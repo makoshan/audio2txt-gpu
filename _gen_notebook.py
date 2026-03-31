@@ -1,27 +1,18 @@
-{
+import json
+
+nb = {
  "nbformat": 4,
  "nbformat_minor": 5,
  "metadata": {
   "accelerator": "GPU",
-  "colab": {
-   "gpuType": "T4",
-   "provenance": []
-  },
-  "kernelspec": {
-   "display_name": "Python 3",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "name": "python",
-   "version": "3.10.0"
-  }
+  "colab": {"gpuType": "T4", "provenance": []},
+  "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
+  "language_info": {"name": "python", "version": "3.10.0"}
  },
  "cells": [
+  # ── Title ─────────────────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "title-cell",
-   "metadata": {},
+   "cell_type": "markdown", "id": "title-cell", "metadata": {},
    "source": [
     "# Audio to Text - faster-whisper + Free GPU\n",
     "\n",
@@ -43,10 +34,9 @@
     "---\n"
    ]
   },
+  # ── Step 0 ────────────────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "step0",
-   "metadata": {},
+   "cell_type": "markdown", "id": "step0", "metadata": {},
    "source": [
     "## Step 0 - Check GPU\n",
     "\n",
@@ -55,11 +45,7 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "check-gpu",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "check-gpu", "metadata": {}, "outputs": [],
    "source": [
     "import subprocess\n",
     "r = subprocess.run(['nvidia-smi', '--query-gpu=name,memory.total,memory.free', '--format=csv,noheader'], capture_output=True, text=True)\n",
@@ -69,20 +55,13 @@
     "    print('No GPU detected. Please switch runtime to GPU and re-run.')\n"
    ]
   },
+  # ── Step 1 ────────────────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "step1",
-   "metadata": {},
-   "source": [
-    "## Step 1 - Install\n"
-   ]
+   "cell_type": "markdown", "id": "step1", "metadata": {},
+   "source": ["## Step 1 - Install\n"]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "install",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "install", "metadata": {}, "outputs": [],
    "source": [
     "# faster-whisper does NOT require system ffmpeg\n",
     "# Uncomment next line if your audio is .m4a / .aac\n",
@@ -90,10 +69,9 @@
     "!pip install -q faster-whisper\n"
    ]
   },
+  # ── Step 2 ────────────────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "step2",
-   "metadata": {},
+   "cell_type": "markdown", "id": "step2", "metadata": {},
    "source": [
     "## Step 2 - Mount Google Drive\n",
     "\n",
@@ -101,11 +79,7 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "mount-drive",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "mount-drive", "metadata": {}, "outputs": [],
    "source": [
     "from google.colab import drive\n",
     "drive.mount('/content/drive')\n",
@@ -117,10 +91,9 @@
     "    print(' ', f)\n"
    ]
   },
+  # ── Step 3 ────────────────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "step3",
-   "metadata": {},
+   "cell_type": "markdown", "id": "step3", "metadata": {},
    "source": [
     "## Step 3 - Config\n",
     "\n",
@@ -134,11 +107,7 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "config",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "config", "metadata": {}, "outputs": [],
    "source": [
     "# ====== Edit here ======\n",
     "AUDIO_PATH  = '/content/drive/MyDrive/audio.mp3'  # your audio file\n",
@@ -157,20 +126,13 @@
     "print(f'Audio: {os.path.getsize(AUDIO_PATH)/1024/1024:.1f} MB')\n"
    ]
   },
+  # ── Step 4 ────────────────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "step4",
-   "metadata": {},
-   "source": [
-    "## Step 4 - Load Model and Transcribe\n"
-   ]
+   "cell_type": "markdown", "id": "step4", "metadata": {},
+   "source": ["## Step 4 - Load Model and Transcribe\n"]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "transcribe",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "transcribe", "metadata": {}, "outputs": [],
    "source": [
     "import time\n",
     "from faster_whisper import WhisperModel, BatchedInferencePipeline\n",
@@ -198,20 +160,13 @@
     "print(f'Duration: {info.duration:.1f}s  realtime: {info.duration/elapsed:.1f}x')\n"
    ]
   },
+  # ── Step 5 ────────────────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "step5",
-   "metadata": {},
-   "source": [
-    "## Step 5 - Save Output\n"
-   ]
+   "cell_type": "markdown", "id": "step5", "metadata": {},
+   "source": ["## Step 5 - Save Output\n"]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "save",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "save", "metadata": {}, "outputs": [],
    "source": [
     "# Plain text\n",
     "with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:\n",
@@ -235,54 +190,49 @@
     "    print(f'[{seg.start:.1f}s->{seg.end:.1f}s] {seg.text.strip()}')\n"
    ]
   },
+  # ── Step 6: WhisperX 说话人分离（必选）────────────
   {
-   "cell_type": "markdown",
-   "id": "step6-whisperx-md",
-   "metadata": {},
+   "cell_type": "markdown", "id": "step6-whisperx-md", "metadata": {},
    "source": [
-    "## Step 6 — WhisperX 说话人分离（必选）\n",
+    "## Step 6 \u2014 WhisperX \u8bf4\u8bdd\u4eba\u5206\u79bb\uff08\u5fc5\u9009\uff09\n",
     "\n",
-    "识别每句话的说话人（SPEAKER_00、SPEAKER_01…），输出带说话人标注的转录文件。\n",
+    "\u8bc6\u522b\u6bcf\u53e5\u8bdd\u7684\u8bf4\u8bdd\u4eba\uff08SPEAKER_00\u3001SPEAKER_01\u2026\uff09\uff0c\u8f93\u51fa\u5e26\u8bf4\u8bdd\u4eba\u6807\u6ce8\u7684\u8f6c\u5f55\u6587\u4ef6\u3002\n",
     "\n",
-    "**前置条件**：\n",
-    "1. 在 [HuggingFace Settings](https://huggingface.co/settings/tokens) 创建 Access Token\n",
-    "2. 接受模型许可：[pyannote/speaker-diarization-3.1](https://huggingface.co/pyannote/speaker-diarization-3.1)\n",
+    "**\u524d\u7f6e\u6761\u4ef6**\uff1a\n",
+    "1. \u5728 [HuggingFace Settings](https://huggingface.co/settings/tokens) \u521b\u5efa Access Token\n",
+    "2. \u63a5\u53d7\u6a21\u578b\u8bb8\u53ef\uff1a[pyannote/speaker-diarization-3.1](https://huggingface.co/pyannote/speaker-diarization-3.1)\n",
     "\n",
-    "**输出文件**：\n",
-    "- `transcript_speakers.txt` — 带说话人标注的纯文本\n",
-    "- `transcript_speakers.srt` — 带说话人的 SRT 字幕\n"
+    "**\u8f93\u51fa\u6587\u4ef6**\uff1a\n",
+    "- `transcript_speakers.txt` \u2014 \u5e26\u8bf4\u8bdd\u4eba\u6807\u6ce8\u7684\u7eaf\u6587\u672c\n",
+    "- `transcript_speakers.srt` \u2014 \u5e26\u8bf4\u8bdd\u4eba\u7684 SRT \u5b57\u5e55\n"
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "whisperx-diarize",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "whisperx-diarize", "metadata": {}, "outputs": [],
    "source": [
-    "# =========== WhisperX 说话人分离配置 ===========\n",
-    "HF_TOKEN     = \"\"   # 在这里填入你的 HuggingFace Access Token\n",
-    "NUM_SPEAKERS = None  # 说话人数量，None=自动检测，或填 2/3/4\n",
-    "MIN_SPEAKERS = 1     # 最少说话人数\n",
-    "MAX_SPEAKERS = 10    # 最多说话人数\n",
+    "# =========== WhisperX \u8bf4\u8bdd\u4eba\u5206\u79bb\u914d\u7f6e ===========\n",
+    "HF_TOKEN     = \"\"   # \u5728\u8fd9\u91cc\u586b\u5165\u4f60\u7684 HuggingFace Access Token\n",
+    "NUM_SPEAKERS = None  # \u8bf4\u8bdd\u4eba\u6570\u91cf\uff0cNone=\u81ea\u52a8\u68c0\u6d4b\uff0c\u6216\u586b 2/3/4\n",
+    "MIN_SPEAKERS = 1     # \u6700\u5c11\u8bf4\u8bdd\u4eba\u6570\n",
+    "MAX_SPEAKERS = 10    # \u6700\u591a\u8bf4\u8bdd\u4eba\u6570\n",
     "SPEAKERS_TXT = '/content/drive/MyDrive/transcript_speakers.txt'\n",
     "SPEAKERS_SRT = '/content/drive/MyDrive/transcript_speakers.srt'\n",
     "# ================================================\n",
     "\n",
-    "assert HF_TOKEN, \"请填写 HF_TOKEN — 前往 https://huggingface.co/settings/tokens 获取\"\n",
+    "assert HF_TOKEN, \"\u8bf7\u586b\u5199 HF_TOKEN \u2014 \u524d\u5f80 https://huggingface.co/settings/tokens \u83b7\u53d6\"\n",
     "\n",
-    "print(\"安装 WhisperX...\")\n",
+    "print(\"\u5b89\u88c5 WhisperX...\")\n",
     "import subprocess, time, torch\n",
     "subprocess.run([\"pip\", \"install\", \"-q\", \"whisperx\"], check=True)\n",
     "\n",
     "import whisperx\n",
     "device = \"cuda\" if torch.cuda.is_available() else \"cpu\"\n",
     "\n",
-    "# --- 加载音频 ---\n",
-    "print(\"加载音频...\")\n",
+    "# --- \u52a0\u8f7d\u97f3\u9891 ---\n",
+    "print(\"\u52a0\u8f7d\u97f3\u9891...\")\n",
     "audio = whisperx.load_audio(AUDIO_PATH)\n",
     "\n",
-    "# --- 将 faster-whisper segments 转为 WhisperX 格式 ---\n",
+    "# --- \u5c06 faster-whisper segments \u8f6c\u4e3a WhisperX \u683c\u5f0f ---\n",
     "wx_segments = [\n",
     "    {\n",
     "        \"start\": seg.start,\n",
@@ -297,8 +247,8 @@
     "]\n",
     "wx_result = {\"segments\": wx_segments, \"language\": LANGUAGE or info.language}\n",
     "\n",
-    "# --- 词级对齐（提高分离精度）---\n",
-    "print(\"词级对齐...\")\n",
+    "# --- \u8bcd\u7ea7\u5bf9\u9f50\uff08\u63d0\u9ad8\u5206\u79bb\u7cbe\u5ea6\uff09---\n",
+    "print(\"\u8bcd\u7ea7\u5bf9\u9f50...\")\n",
     "t0 = time.time()\n",
     "align_model, align_meta = whisperx.load_align_model(\n",
     "    language_code=wx_result[\"language\"], device=device\n",
@@ -306,10 +256,10 @@
     "wx_result = whisperx.align(\n",
     "    wx_result[\"segments\"], align_model, align_meta, audio, device\n",
     ")\n",
-    "print(f\"对齐完成 ({time.time()-t0:.1f}s)\")\n",
+    "print(f\"\u5bf9\u9f50\u5b8c\u6210 ({time.time()-t0:.1f}s)\")\n",
     "\n",
-    "# --- 说话人分离 ---\n",
-    "print(\"说话人分离中（需 ~30s）...\")\n",
+    "# --- \u8bf4\u8bdd\u4eba\u5206\u79bb ---\n",
+    "print(\"\u8bf4\u8bdd\u4eba\u5206\u79bb\u4e2d\uff08\u9700 ~30s\uff09...\")\n",
     "t1 = time.time()\n",
     "diarize_pipeline = whisperx.DiarizationPipeline(\n",
     "    use_auth_token=HF_TOKEN, device=device\n",
@@ -320,16 +270,16 @@
     "if MAX_SPEAKERS: diarize_kwargs[\"max_speakers\"] = MAX_SPEAKERS\n",
     "diarize_segments = diarize_pipeline(audio, **diarize_kwargs)\n",
     "wx_result = whisperx.assign_word_speakers(diarize_segments, wx_result)\n",
-    "print(f\"分离完成 ({time.time()-t1:.1f}s)\")\n",
+    "print(f\"\u5206\u79bb\u5b8c\u6210 ({time.time()-t1:.1f}s)\")\n",
     "\n",
-    "# --- 统计说话人 ---\n",
+    "# --- \u7edf\u8ba1\u8bf4\u8bdd\u4eba ---\n",
     "speakers_found = sorted(set(\n",
     "    seg.get(\"speaker\", \"UNKNOWN\")\n",
     "    for seg in wx_result[\"segments\"]\n",
     "))\n",
-    "print(f\"\\n识别到 {len(speakers_found)} 位说话人: {', '.join(speakers_found)}\")\n",
+    "print(f\"\\n\u8bc6\u522b\u5230 {len(speakers_found)} \u4f4d\u8bf4\u8bdd\u4eba: {', '.join(speakers_found)}\")\n",
     "\n",
-    "# --- 保存带说话人的纯文本 ---\n",
+    "# --- \u4fdd\u5b58\u5e26\u8bf4\u8bdd\u4eba\u7684\u7eaf\u6587\u672c ---\n",
     "with open(SPEAKERS_TXT, 'w', encoding='utf-8') as f:\n",
     "    current_speaker = None\n",
     "    for seg in wx_result[\"segments\"]:\n",
@@ -338,9 +288,9 @@
     "            f.write(f\"\\n[{spk}]\\n\")\n",
     "            current_speaker = spk\n",
     "        f.write(seg[\"text\"].strip() + \"\\n\")\n",
-    "print(f\"说话人文本已保存: {SPEAKERS_TXT}\")\n",
+    "print(f\"\u8bf4\u8bdd\u4eba\u6587\u672c\u5df2\u4fdd\u5b58: {SPEAKERS_TXT}\")\n",
     "\n",
-    "# --- 保存带说话人的 SRT ---\n",
+    "# --- \u4fdd\u5b58\u5e26\u8bf4\u8bdd\u4eba\u7684 SRT ---\n",
     "def fmt(sec):\n",
     "    h, r = divmod(int(sec), 3600)\n",
     "    m, s = divmod(r, 60)\n",
@@ -350,102 +300,97 @@
     "    for i, seg in enumerate(wx_result[\"segments\"], 1):\n",
     "        spk = seg.get('speaker', 'UNKNOWN')\n",
     "        f.write(f\"{i}\\n{fmt(seg['start'])} --> {fmt(seg['end'])}\\n[{spk}] {seg['text'].strip()}\\n\\n\")\n",
-    "print(f\"说话人 SRT 已保存: {SPEAKERS_SRT}\")\n",
+    "print(f\"\u8bf4\u8bdd\u4eba SRT \u5df2\u4fdd\u5b58: {SPEAKERS_SRT}\")\n",
     "\n",
-    "# --- 后续步骤可直接使用 wx_result[\"segments\"] ---\n",
+    "# --- \u540e\u7eed\u6b65\u9aa4\u53ef\u76f4\u63a5\u4f7f\u7528 wx_result[\"segments\"] ---\n",
     "diarized_segments = wx_result[\"segments\"]\n",
     "\n",
-    "print(\"\\n--- 预览（前 5 段）---\")\n",
+    "print(\"\\n--- \u9884\u89c8\uff08\u524d 5 \u6bb5\uff09---\")\n",
     "for seg in diarized_segments[:5]:\n",
     "    spk = seg.get('speaker', 'UNKNOWN')\n",
     "    print(f\"[{spk}] [{seg['start']:.1f}s->{seg['end']:.1f}s] {seg['text'].strip()}\")\n"
    ]
   },
+  # ── Step 7: AI 优化处理（必选）───────────────────
   {
-   "cell_type": "markdown",
-   "id": "step7-ai-md",
-   "metadata": {},
+   "cell_type": "markdown", "id": "step7-ai-md", "metadata": {},
    "source": [
-    "## Step 7 — AI 优化处理（必选）\n",
+    "## Step 7 \u2014 AI \u4f18\u5316\u5904\u7406\uff08\u5fc5\u9009\uff09\n",
     "\n",
-    "自动清理、结构化原始转录，提升可读性。\n",
+    "\u81ea\u52a8\u6e05\u7406\u3001\u7ed3\u6784\u5316\u539f\u59cb\u8f6c\u5f55\uff0c\u63d0\u5347\u53ef\u8bfb\u6027\u3002\n",
     "\n",
-    "**功能**：\n",
-    "- 删除无意义重复、口头禅\n",
-    "- 补充标点，分段重组\n",
-    "- 提取核心主题，结构化输出\n",
-    "- 支持 OpenAI / DeepSeek API\n",
-    "- 自动读取 Step 6 输出的带说话人转录\n",
+    "**\u529f\u80fd**\uff1a\n",
+    "- \u5220\u9664\u65e0\u610f\u4e49\u91cd\u590d\u3001\u53e3\u5934\u7985\n",
+    "- \u8865\u5145\u6807\u70b9\uff0c\u5206\u6bb5\u91cd\u7ec4\n",
+    "- \u63d0\u53d6\u6838\u5fc3\u4e3b\u9898\uff0c\u7ed3\u6784\u5316\u8f93\u51fa\n",
+    "- \u652f\u6301 OpenAI / DeepSeek API\n",
+    "- \u81ea\u52a8\u8bfb\u53d6 Step 6 \u8f93\u51fa\u7684\u5e26\u8bf4\u8bdd\u4eba\u8f6c\u5f55\n",
     "\n",
-    "**输出文件**：\n",
-    "- `transcript_optimized.md` — 优化后的 Markdown 文档\n",
-    "- `transcript_optimized.txt` — 纯文本版本\n"
+    "**\u8f93\u51fa\u6587\u4ef6**\uff1a\n",
+    "- `transcript_optimized.md` \u2014 \u4f18\u5316\u540e\u7684 Markdown \u6587\u6863\n",
+    "- `transcript_optimized.txt` \u2014 \u7eaf\u6587\u672c\u7248\u672c\n"
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "ai-optimize",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "ai-optimize", "metadata": {}, "outputs": [],
    "source": [
-    "# =========== AI 优化配置 ===========\n",
+    "# =========== AI \u4f18\u5316\u914d\u7f6e ===========\n",
     "AI_MODEL   = \"deepseek-chat\"  # \"gpt-4o-mini\" / \"deepseek-chat\"\n",
-    "AI_API_KEY = \"\"               # 在这里填入你的 API Key\n",
-    "MAX_TOKENS = 4000             # 输出长度限制\n",
+    "AI_API_KEY = \"\"               # \u5728\u8fd9\u91cc\u586b\u5165\u4f60\u7684 API Key\n",
+    "MAX_TOKENS = 4000             # \u8f93\u51fa\u957f\u5ea6\u9650\u5236\n",
     "# ==================================\n",
     "\n",
-    "assert AI_API_KEY, \"请填写 AI_API_KEY — DeepSeek: https://platform.deepseek.com/  OpenAI: https://platform.openai.com/\"\n",
+    "assert AI_API_KEY, \"\u8bf7\u586b\u5199 AI_API_KEY \u2014 DeepSeek: https://platform.deepseek.com/  OpenAI: https://platform.openai.com/\"\n",
     "\n",
     "import requests, json, time, os\n",
     "\n",
-    "# 优先读取带说话人标注的转录（Step 6 输出），否则回退到原始转录\n",
+    "# \u4f18\u5148\u8bfb\u53d6\u5e26\u8bf4\u8bdd\u4eba\u6807\u6ce8\u7684\u8f6c\u5f55\uff08Step 6 \u8f93\u51fa\uff09\uff0c\u5426\u5219\u56de\u9000\u5230\u539f\u59cb\u8f6c\u5f55\n",
     "src_path = SPEAKERS_TXT if os.path.exists(SPEAKERS_TXT) else OUTPUT_PATH\n",
-    "print(f\"读取源文件: {src_path}\")\n",
+    "print(f\"\u8bfb\u53d6\u6e90\u6587\u4ef6: {src_path}\")\n",
     "with open(src_path, 'r', encoding='utf-8') as f:\n",
     "    raw_text = f.read()\n",
     "\n",
-    "# 通用优化提示词（支持有/无说话人标注）\n",
+    "# \u901a\u7528\u4f18\u5316\u63d0\u793a\u8bcd\uff08\u652f\u6301\u6709/\u65e0\u8bf4\u8bdd\u4eba\u6807\u6ce8\uff09\n",
     "has_speakers = os.path.exists(SPEAKERS_TXT)\n",
     "speaker_hint = (\n",
-    "    \"- 文本已含说话人标注（如 [SPEAKER_00]），请保留标注并按说话人梳理对话结构\"\n",
+    "    \"- \u6587\u672c\u5df2\u542b\u8bf4\u8bdd\u4eba\u6807\u6ce8\uff08\u5982 [SPEAKER_00]\uff09\uff0c\u8bf7\u4fdd\u7559\u6807\u6ce8\u5e76\u6309\u8bf4\u8bdd\u4eba\u68b3\u7406\u5bf9\u8bdd\u7ed3\u6784\"\n",
     "    if has_speakers else\n",
-    "    \"- 可能有多个说话人交替，请尝试区分不同说话人的内容\"\n",
+    "    \"- \u53ef\u80fd\u6709\u591a\u4e2a\u8bf4\u8bdd\u4eba\u4ea4\u66ff\uff0c\u8bf7\u5c1d\u8bd5\u533a\u5206\u4e0d\u540c\u8bf4\u8bdd\u4eba\u7684\u5185\u5bb9\"\n",
     ")\n",
     "\n",
-    "prompt = f\"\"\"请将以下原始转录文本优化为结构清晰、逻辑连贯的专业文档。\n",
+    "prompt = f\"\"\"\u8bf7\u5c06\u4ee5\u4e0b\u539f\u59cb\u8f6c\u5f55\u6587\u672c\u4f18\u5316\u4e3a\u7ed3\u6784\u6e05\u6670\u3001\u903b\u8f91\u8fde\u8d2f\u7684\u4e13\u4e1a\u6587\u6863\u3002\n",
     "\n",
-    "【原始转录特征】\n",
-    "- 含口语重复、口头禅、环境噪音标注\n",
-    "- 句子结构松散，标点缺失\n",
+    "\u3010\u539f\u59cb\u8f6c\u5f55\u7279\u5f81\u3011\n",
+    "- \u542b\u53e3\u8bed\u91cd\u590d\u3001\u53e3\u5934\u7985\u3001\u73af\u5883\u566a\u97f3\u6807\u6ce8\n",
+    "- \u53e5\u5b50\u7ed3\u6784\u677e\u6563\uff0c\u6807\u70b9\u7f3a\u5931\n",
     "{speaker_hint}\n",
     "\n",
-    "【优化要求】\n",
-    "1. **清理文本**\n",
-    "   - 删除无意义重复（如“对对对”、“这个这个”）\n",
-    "   - 合并碎片短句为完整句子\n",
-    "   - 补充标点，分段合理\n",
+    "\u3010\u4f18\u5316\u8981\u6c42\u3011\n",
+    "1. **\u6e05\u7406\u6587\u672c**\n",
+    "   - \u5220\u9664\u65e0\u610f\u4e49\u91cd\u590d\uff08\u5982\u201c\u5bf9\u5bf9\u5bf9\u201d\u3001\u201c\u8fd9\u4e2a\u8fd9\u4e2a\u201d\uff09\n",
+    "   - \u5408\u5e76\u788e\u7247\u77ed\u53e5\u4e3a\u5b8c\u6574\u53e5\u5b50\n",
+    "   - \u8865\u5145\u6807\u70b9\uff0c\u5206\u6bb5\u5408\u7406\n",
     "\n",
-    "2. **结构化重组**\n",
-    "   - 提取核心主题作为章节标题\n",
-    "   - 按逻辑顺序重组内容\n",
-    "   - 用列表/表格整理关键数据\n",
+    "2. **\u7ed3\u6784\u5316\u91cd\u7ec4**\n",
+    "   - \u63d0\u53d6\u6838\u5fc3\u4e3b\u9898\u4f5c\u4e3a\u7ae0\u8282\u6807\u9898\n",
+    "   - \u6309\u903b\u8f91\u987a\u5e8f\u91cd\u7ec4\u5185\u5bb9\n",
+    "   - \u7528\u5217\u8868/\u8868\u683c\u6574\u7406\u5173\u952e\u6570\u636e\n",
     "\n",
-    "3. **提炼要点**\n",
-    "   - 提取各方观点/立场\n",
-    "   - 总结决策/结论\n",
-    "   - 标注存疑/待确认事项\n",
+    "3. **\u63d0\u70bc\u8981\u70b9**\n",
+    "   - \u63d0\u53d6\u5404\u65b9\u89c2\u70b9/\u7acb\u573a\n",
+    "   - \u603b\u7ed3\u51b3\u7b56/\u7ed3\u8bba\n",
+    "   - \u6807\u6ce8\u5b58\u7591/\u5f85\u786e\u8ba4\u4e8b\u9879\n",
     "\n",
-    "4. **格式标准化**\n",
-    "   - 统一专有名词（如产品名、技术术语）\n",
-    "   - 时间戳转为参考标注（可选）\n",
-    "   - 输出为 Markdown\n",
+    "4. **\u683c\u5f0f\u6807\u51c6\u5316**\n",
+    "   - \u7edf\u4e00\u4e13\u6709\u540d\u8bcd\uff08\u5982\u4ea7\u54c1\u540d\u3001\u6280\u672f\u672f\u8bed\uff09\n",
+    "   - \u65f6\u95f4\u6233\u8f6c\u4e3a\u53c2\u8003\u6807\u6ce8\uff08\u53ef\u9009\uff09\n",
+    "   - \u8f93\u51fa\u4e3a Markdown\n",
     "\n",
-    "【原始文本开始】\n",
+    "\u3010\u539f\u59cb\u6587\u672c\u5f00\u59cb\u3011\n",
     "{raw_text[:MAX_TOKENS*3]}\n",
-    "【原始文本结束】\"\"\"\n",
+    "\u3010\u539f\u59cb\u6587\u672c\u7ed3\u675f\u3011\"\"\"\n",
     "\n",
-    "print(\"开始 AI 优化处理...\")\n",
+    "print(\"\u5f00\u59cb AI \u4f18\u5316\u5904\u7406...\")\n",
     "t0 = time.time()\n",
     "result = \"\"\n",
     "\n",
@@ -455,7 +400,7 @@
     "    data = {\n",
     "        \"model\": AI_MODEL,\n",
     "        \"messages\": [\n",
-    "            {\"role\": \"system\", \"content\": \"你是一个专业的文本优化助手，擅长将口语对话转录稿转为结构化文档。\"},\n",
+    "            {\"role\": \"system\", \"content\": \"\u4f60\u662f\u4e00\u4e2a\u4e13\u4e1a\u7684\u6587\u672c\u4f18\u5316\u52a9\u624b\uff0c\u64c5\u957f\u5c06\u53e3\u8bed\u5bf9\u8bdd\u8f6c\u5f55\u7a3f\u8f6c\u4e3a\u7ed3\u6784\u5316\u6587\u6863\u3002\"},\n",
     "            {\"role\": \"user\", \"content\": prompt}\n",
     "        ],\n",
     "        \"temperature\": 0.3,\n",
@@ -466,9 +411,9 @@
     "        if resp.status_code == 200:\n",
     "            result = resp.json()[\"choices\"][0][\"message\"][\"content\"]\n",
     "        else:\n",
-    "            print(f\"DeepSeek API 错误: {resp.status_code} {resp.text[:200]}\")\n",
+    "            print(f\"DeepSeek API \u9519\u8bef: {resp.status_code} {resp.text[:200]}\")\n",
     "    except Exception as e:\n",
-    "        print(f\"请求失败: {e}\")\n",
+    "        print(f\"\u8bf7\u6c42\u5931\u8d25: {e}\")\n",
     "else:\n",
     "    import openai\n",
     "    openai.api_key = AI_API_KEY\n",
@@ -476,7 +421,7 @@
     "        resp = openai.ChatCompletion.create(\n",
     "            model=AI_MODEL,\n",
     "            messages=[\n",
-    "                {\"role\": \"system\", \"content\": \"你是一个专业的文本优化助手，擅长将口语对话转录稿转为结构化文档。\"},\n",
+    "                {\"role\": \"system\", \"content\": \"\u4f60\u662f\u4e00\u4e2a\u4e13\u4e1a\u7684\u6587\u672c\u4f18\u5316\u52a9\u624b\uff0c\u64c5\u957f\u5c06\u53e3\u8bed\u5bf9\u8bdd\u8f6c\u5f55\u7a3f\u8f6c\u4e3a\u7ed3\u6784\u5316\u6587\u6863\u3002\"},\n",
     "                {\"role\": \"user\", \"content\": prompt}\n",
     "            ],\n",
     "            temperature=0.3,\n",
@@ -484,7 +429,7 @@
     "        )\n",
     "        result = resp.choices[0].message.content\n",
     "    except Exception as e:\n",
-    "        print(f\"OpenAI API 错误: {e}\")\n",
+    "        print(f\"OpenAI API \u9519\u8bef: {e}\")\n",
     "\n",
     "if result:\n",
     "    optimized_md  = OUTPUT_PATH.replace('.txt', '_optimized.md')\n",
@@ -493,19 +438,18 @@
     "        f.write(result)\n",
     "    with open(optimized_txt, 'w', encoding='utf-8') as f:\n",
     "        f.write(result.replace('```markdown', '').replace('```', '').strip())\n",
-    "    print(f\"✅ AI 优化完成！（{time.time()-t0:.1f}s）\")\n",
+    "    print(f\"\u2705 AI \u4f18\u5316\u5b8c\u6210\uff01\uff08{time.time()-t0:.1f}s\uff09\")\n",
     "    print(f\"   Markdown : {optimized_md}\")\n",
-    "    print(f\"   纯文本  : {optimized_txt}\")\n",
-    "    print(\"\\n--- 预览（前 300 字符）---\")\n",
+    "    print(f\"   \u7eaf\u6587\u672c  : {optimized_txt}\")\n",
+    "    print(\"\\n--- \u9884\u89c8\uff08\u524d 300 \u5b57\u7b26\uff09---\")\n",
     "    print(result[:300] + \"...\")\n",
     "else:\n",
-    "    print(\"⚠️  AI 优化失败，请检查 API Key 或网络。\")\n"
+    "    print(\"\u26a0\ufe0f  AI \u4f18\u5316\u5931\u8d25\uff0c\u8bf7\u68c0\u67e5 API Key \u6216\u7f51\u7edc\u3002\")\n"
    ]
   },
+  # ── Studio Lab 备注 ───────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "studio-lab",
-   "metadata": {},
+   "cell_type": "markdown", "id": "studio-lab", "metadata": {},
    "source": [
     "---\n",
     "## Note: Switch to AWS Studio Lab\n",
@@ -521,3 +465,12 @@
   }
  ]
 }
+
+out = '/Users/thursday/WorkBuddy/20260331142519/audio_transcription_faster_whisper.ipynb'
+with open(out, 'w', encoding='utf-8') as f:
+    json.dump(nb, f, ensure_ascii=False, indent=1)
+
+# validate
+with open(out, encoding='utf-8') as f:
+    json.load(f)
+print('JSON valid ✅')
