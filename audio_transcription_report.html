@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>音频转文字方案调研报告 · 2026-03-31</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3250;
+    --accent: #6c8cff;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --code-bg: #131626;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', system-ui, sans-serif;
+    line-height: 1.7;
+    padding: 0 0 80px;
+  }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 56px 24px 48px;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(108,140,255,.15);
+    color: var(--accent);
+    border: 1px solid rgba(108,140,255,.3);
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 12px;
+    letter-spacing: .5px;
+    margin-bottom: 18px;
+    font-weight: 600;
+  }
+  .hero h1 {
+    font-size: clamp(26px, 4vw, 44px);
+    font-weight: 700;
+    background: linear-gradient(135deg, #e2e8f0, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .hero-meta { color: var(--muted); font-size: 14px; }
+  .hero-meta span { margin: 0 10px; }
+
+  /* Layout */
+  .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  section { margin-top: 52px; }
+  h2 {
+    font-size: 20px; font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2::before { content: ''; display: block; width: 3px; height: 20px; background: var(--accent); border-radius: 2px; }
+  h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 14px;
+  }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .card.highlight { border-color: rgba(108,140,255,.5); background: rgba(108,140,255,.06); }
+  .card.green-hl { border-color: rgba(52,211,153,.4); background: rgba(52,211,153,.04); }
+  .card.warn { border-color: rgba(251,191,36,.3); background: rgba(251,191,36,.04); }
+
+  /* Rank badge */
+  .rank { display: inline-block; width: 24px; height: 24px; border-radius: 50%; font-size: 12px; font-weight: 700; line-height: 24px; text-align: center; flex-shrink: 0; }
+  .rank-1 { background: var(--accent); color: #fff; }
+  .rank-2 { background: var(--green); color: #0f1117; }
+  .rank-3 { background: var(--yellow); color: #0f1117; }
+  .rank-4 { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+  .platform-card {
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .platform-body { flex: 1; }
+  .platform-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .quota-tag {
+    display: inline-block;
+    background: var(--surface2); color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 8px; font-size: 11px;
+    margin-right: 6px; margin-bottom: 6px;
+    font-family: 'SF Mono', monospace;
+  }
+  .quota-tag.good { background: rgba(52,211,153,.12); color: var(--green); border-color: rgba(52,211,153,.3); }
+  .quota-tag.med  { background: rgba(251,191,36,.12); color: var(--yellow); border-color: rgba(251,191,36,.3); }
+  .quota-tag.low  { background: rgba(248,113,113,.1); color: var(--red); border-color: rgba(248,113,113,.3); }
+
+  /* Comparison table */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { background: var(--surface2); color: var(--muted); font-weight: 600; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr.best td { background: rgba(108,140,255,.06); }
+  .check { color: var(--green); font-weight: 700; }
+  .cross { color: var(--red); }
+  .star { color: var(--yellow); }
+
+  /* Code block */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    overflow-x: auto;
+    font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    margin: 0;
+  }
+  .code-wrap { margin-bottom: 14px; }
+  .code-label {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 7px 16px;
+    font-size: 12px; color: var(--muted);
+    font-family: monospace;
+  }
+  .code-wrap pre { border-radius: 0 0 var(--radius) var(--radius); }
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .cm { color: #546e7a; font-style: italic; }
+  .num { color: #f78c6c; }
+  .var { color: #ffcb6b; }
+
+  /* Decision tree */
+  .decision { display: flex; flex-direction: column; gap: 0; }
+  .dec-row {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .dec-row:last-child { border-bottom: none; }
+  .dec-q { color: var(--muted); font-size: 13px; flex: 0 0 160px; padding-top: 2px; }
+  .dec-a { font-weight: 600; color: var(--text); }
+  .dec-a .tag {
+    display: inline-block;
+    background: rgba(108,140,255,.15); color: var(--accent);
+    border-radius: 4px; padding: 1px 9px; font-size: 12px; margin-left: 6px;
+    font-weight: 700;
+  }
+
+  /* TL;DR box */
+  .tldr {
+    background: linear-gradient(135deg, rgba(108,140,255,.12), rgba(167,139,250,.08));
+    border: 1px solid rgba(108,140,255,.35);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin-bottom: 14px;
+  }
+  .tldr h3 { color: var(--accent2); margin-bottom: 10px; font-size: 14px; letter-spacing: .4px; }
+  .tldr ul { list-style: none; }
+  .tldr li { padding: 4px 0; display: flex; gap: 10px; }
+  .tldr li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+
+  /* Sources */
+  .source-list { list-style: none; }
+  .source-list li { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+  .source-list li:last-child { border-bottom: none; }
+  .source-list a { color: var(--accent); text-decoration: none; }
+  .source-list a:hover { text-decoration: underline; }
+  .source-tag {
+    display: inline-block; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 3px; padding: 0 6px; font-size: 10px; margin-right: 6px;
+    font-family: monospace; color: var(--muted); vertical-align: middle;
+  }
+
+  @media (max-width: 640px) {
+    .dec-q { flex: 0 0 100px; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">调研报告</div>
+  <h1>🎙️ 音频转文字 · 免费 GPU 方案</h1>
+  <div class="hero-meta">
+    <span>📅 2026-03-31</span>
+    <span>·</span>
+    <span>核心方案: Google Colab + faster-whisper</span>
+    <span>·</span>
+    <span>备用: AWS Studio Lab</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- TL;DR -->
+  <section>
+    <h2>结论速查</h2>
+    <div class="tldr">
+      <h3>TL;DR — 3 行决策</h3>
+      <ul>
+        <li>默认用 <strong>Google Colab free + faster-whisper large-v3</strong>，中文精度最佳，T4 GPU 免费</li>
+        <li>Colab 额度耗尽 → 切 <strong>AWS Studio Lab</strong>（GPU 单次 4h，环境包持久化，代码零改动）</li>
+        <li>需要"谁在说话" → 加装 <strong>WhisperX</strong>，同一 Colab 环境，多申请一个 HF token</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 平台评级 -->
+  <section>
+    <h2>免费 GPU 平台排序</h2>
+    <div class="card platform-card highlight">
+      <span class="rank rank-1">1</span>
+      <div class="platform-body">
+        <div class="platform-name">Google Colab 免费版 ⭐ 首选</div>
+        <span class="quota-tag good">T4 GPU</span>
+        <span class="quota-tag good">单次 ~12h</span>
+        <span class="quota-tag med">动态限制不公开</span>
+        <p style="font-size:13px;color:var(--muted);margin-top:6px;">最易上手，notebook 即用，Drive 挂载无缝。免费额度受"使用频率"动态调节，官方 FAQ 不公布固定数字，但日常用够。</p>
+      </div>
+    </div>
+    <div class="card platform-card green-hl">
+      <span class="rank rank-2">2</span>
+      <div class="platform-body">
+        <div class="platform-name">AWS SageMaker Studio Lab</div>
+        <span class="quota-tag good">GPU 单次 4h</span>
+        <span class="quota-tag good">24h 内共 4h</span>
+        <span class="quota-tag good">环境持久化 ✅</span>
+        <p style="font-size:13px;color:var(--muted);margin-top:6px;">额度最透明，pip 包不会丢失，适合接力跑长音频。切换时只需改 AUDIO_PATH，代码其余部分完全通用。</p>
+      </div>
+    </div>
+    <div class="card platform-card">
+      <span class="rank rank-3">3</span>
+      <div class="platform-body">
+        <div class="platform-name">Lightning AI</div>
+        <span class="quota-tag med">每月有 free credits</span>
+        <span class="quota-tag low">官方页面额度表述不一致</span>
+        <p style="font-size:13px;color:var(--muted);margin-top:6px;">有免费 GPU，但不同官方页面对额度写法不统一，不建议作为确定性主方案。</p>
+      </div>
+    </div>
+    <div class="card platform-card">
+      <span class="rank rank-4">4</span>
+      <div class="platform-body">
+        <div class="platform-name">Kaggle</div>
+        <span class="quota-tag med">每周 ~30h GPU</span>
+        <span class="quota-tag low">需手机验证</span>
+        <p style="font-size:13px;color:var(--muted);margin-top:6px;">社区常用，额度确实充足，但需绑定手机号，环境略重。本次未找到官方明确的配额说明文档。</p>
+      </div>
+    </div>
+    <div class="card platform-card warn" style="opacity:.75;">
+      <span class="rank rank-4">5</span>
+      <div class="platform-body">
+        <div class="platform-name">百度 AI Studio</div>
+        <span class="quota-tag low">大陆网络友好</span>
+        <span class="quota-tag low">官方额度说明不清晰</span>
+        <p style="font-size:13px;color:var(--muted);margin-top:6px;">有免费 GPU，国内访问稳定，但未找到稳定、近期的官方额度说明，列为中国大陆用户备用选项。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 方案对比 -->
+  <section>
+    <h2>转录模型方案对比</h2>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table>
+        <thead>
+          <tr>
+            <th>方案</th>
+            <th>速度 (vs whisper)</th>
+            <th>中文精度</th>
+            <th>说话人分离</th>
+            <th>VAD</th>
+            <th>词级时间戳</th>
+            <th>需要 ffmpeg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>openai/whisper</td>
+            <td>1× 基准</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="check">需要</td>
+          </tr>
+          <tr class="best">
+            <td><strong>faster-whisper ⭐</strong></td>
+            <td><strong>4–5× 更快</strong></td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="check">✓ 内置</td>
+            <td class="check">✓ 内置</td>
+            <td class="check">不需要</td>
+          </tr>
+          <tr>
+            <td>WhisperX</td>
+            <td>~3×</td>
+            <td class="check">✓</td>
+            <td class="check">✓ 内置</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+            <td class="check">需要</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 决策树 -->
+  <section>
+    <h2>场景决策树</h2>
+    <div class="card">
+      <div class="decision">
+        <div class="dec-row">
+          <div class="dec-q">🎯 追求速度</div>
+          <div class="dec-a">模型选 <code>turbo</code><span class="tag">快 + 够用</span></div>
+        </div>
+        <div class="dec-row">
+          <div class="dec-q">🇨🇳 最稳中文精度</div>
+          <div class="dec-a">模型选 <code>large-v3</code><span class="tag">最佳精度</span></div>
+        </div>
+        <div class="dec-row">
+          <div class="dec-q">📺 需要字幕轴</div>
+          <div class="dec-a">开 <code>word_timestamps=True</code>，直接导出 .srt</div>
+        </div>
+        <div class="dec-row">
+          <div class="dec-q">🔕 长静音段多</div>
+          <div class="dec-a">开 <code>vad_filter=True</code>，自动跳过静音省时间</div>
+        </div>
+        <div class="dec-row">
+          <div class="dec-q">👥 区分多个说话人</div>
+          <div class="dec-a">升级到 <strong>WhisperX</strong>，申请 HF token<span class="tag">diarization</span></div>
+        </div>
+        <div class="dec-row">
+          <div class="dec-q">⏰ Colab 超时</div>
+          <div class="dec-a">切 <strong>Studio Lab</strong>，改 AUDIO_PATH，代码零改动</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 模型大小参数 -->
+  <section>
+    <h2>模型大小参数速查</h2>
+    <div class="card-grid">
+      <div class="card" style="padding:16px 18px;">
+        <h3>tiny / base</h3>
+        <div style="font-size:13px;color:var(--muted);">VRAM ~1GB<br>最快，适合验证环境</div>
+      </div>
+      <div class="card" style="padding:16px 18px;">
+        <h3>small / medium</h3>
+        <div style="font-size:13px;color:var(--muted);">VRAM 2–5GB<br>精度/速度均衡</div>
+      </div>
+      <div class="card highlight" style="padding:16px 18px;">
+        <h3>turbo ⭐ 速度优先</h3>
+        <div style="font-size:13px;color:var(--muted);">VRAM ~6GB<br>速度快，中文够用</div>
+      </div>
+      <div class="card highlight" style="padding:16px 18px;">
+        <h3>large-v3 ⭐ 精度优先</h3>
+        <div style="font-size:13px;color:var(--muted);">VRAM ~10GB<br>中文精度最佳，T4 (15GB) 可用</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 核心代码 -->
+  <section>
+    <h2>最小可落地代码</h2>
+
+    <div class="code-wrap">
+      <div class="code-label">🐍 faster-whisper · Colab / Studio Lab 通用</div>
+      <pre><span class="cm"># Step 1: 安装</span>
+<span class="fn">!</span>pip install -q faster-whisper
+
+<span class="cm"># Step 2 (仅 Colab): 挂载 Drive</span>
+<span class="kw">from</span> google.colab <span class="kw">import</span> drive
+drive.mount(<span class="str">'/content/drive'</span>)
+
+<span class="cm"># Step 3: 转录</span>
+<span class="kw">from</span> faster_whisper <span class="kw">import</span> WhisperModel, BatchedInferencePipeline
+
+model = WhisperModel(<span class="str">"large-v3"</span>, device=<span class="str">"cuda"</span>, compute_type=<span class="str">"float16"</span>)
+batched = BatchedInferencePipeline(model=model)
+
+segments, info = batched.transcribe(
+    <span class="str">"/content/drive/MyDrive/audio.mp3"</span>,  <span class="cm"># ← 改成你的路径</span>
+    batch_size=<span class="num">16</span>,
+    vad_filter=<span class="kw">True</span>,
+    word_timestamps=<span class="kw">True</span>,
+    language=<span class="str">"zh"</span>
+)
+
+<span class="cm"># Step 4: 输出</span>
+<span class="kw">for</span> seg <span class="kw">in</span> segments:
+    print(f<span class="str">"[{seg.start:.1f}s → {seg.end:.1f}s] {seg.text.strip()}"</span>)</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">📦 WhisperX · 说话人分离扩展（按需）</div>
+      <pre><span class="fn">!</span>pip install -q whisperx
+
+<span class="kw">import</span> whisperx
+
+<span class="var">HF_TOKEN</span> = <span class="str">"hf_你的token"</span>  <span class="cm"># huggingface.co/settings/tokens</span>
+audio = whisperx.load_audio(<span class="str">"/content/drive/MyDrive/audio.mp3"</span>)
+
+<span class="cm"># 1. 转录</span>
+model = whisperx.load_model(<span class="str">"large-v3"</span>, <span class="str">"cuda"</span>, compute_type=<span class="str">"float16"</span>)
+result = model.transcribe(audio, batch_size=<span class="num">16</span>, language=<span class="str">"zh"</span>)
+
+<span class="cm"># 2. 词级对齐</span>
+align_model, metadata = whisperx.load_align_model(language_code=<span class="str">"zh"</span>, device=<span class="str">"cuda"</span>)
+result = whisperx.align(result[<span class="str">"segments"</span>], align_model, metadata, audio, <span class="str">"cuda"</span>)
+
+<span class="cm"># 3. 说话人分离</span>
+diarize = whisperx.DiarizationPipeline(use_auth_token=<span class="var">HF_TOKEN</span>, device=<span class="str">"cuda"</span>)
+result = whisperx.assign_word_speakers(diarize(audio), result)
+
+<span class="kw">for</span> seg <span class="kw">in</span> result[<span class="str">"segments"</span>]:
+    print(f<span class="str">"[{seg.get('speaker','?')}] {seg['text'].strip()}"</span>)</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">🖥️ 本地命令行（transcribe.py）</div>
+      <pre><span class="cm"># 安装</span>
+pip install faster-whisper
+
+<span class="cm"># 基础转录</span>
+python transcribe.py meeting.mp3
+
+<span class="cm"># 指定模型和语言</span>
+python transcribe.py meeting.mp3 --model turbo --lang zh
+
+<span class="cm"># 输出到指定目录</span>
+python transcribe.py meeting.mp3 --model large-v3 --out-dir ./output
+
+<span class="cm"># 切换到 Studio Lab 时只需改路径</span>
+<span class="cm"># AUDIO_PATH = '/home/studio-lab-user/audio.mp3'</span></pre>
+    </div>
+  </section>
+
+  <!-- 旧方案问题 -->
+  <section>
+    <h2>调研中发现的旧方案问题</h2>
+    <div class="card warn">
+      <h3>⚠️ 你原始链接里的 notebook 不建议直接用</h3>
+      <div style="font-size:14px;color:var(--muted);margin-top:8px;line-height:1.8;">
+        <p>🔴 <strong>旧版 錄音檔轉文字.ipynb</strong> — 核心是 <code>SpeechRecognition</code> 库，不是 Whisper，也没有用 GPU。作者自己在 2024-02-20 更新记录里写明 Colab 多线程被限制后方案已变脆弱。</p>
+        <p style="margin-top:8px;">🟡 <strong>whisper_Test.ipynb</strong> — 同仓库新版，元数据里确实指定了 GPU/T4，方向是对的，但代码相对简单，不含 VAD/批量推理优化。</p>
+        <p style="margin-top:8px;">🔴 <strong>colab-cli（Akshay090）</strong> — 最后提交是 2020-04-27，仅 21 次提交，主要功能是同步本地 .ipynb 到 Drive，不能控制 Colab runtime。</p>
+        <p style="margin-top:8px;">🟡 <strong>googleworkspace/cli</strong> — 活跃（最近提交 2026-03-26），但它是 Workspace API CLI，不是 Colab runtime 控制器，最多帮你操作 Drive 文件，不能替代 Colab 本身。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 参考来源 -->
+  <section>
+    <h2>参考来源</h2>
+    <div class="card" style="padding:16px 22px;">
+      <ul class="source-list">
+        <li><span class="source-tag">官方</span><a href="https://research.google.com/colaboratory/intl/zh-TW/faq.html">Google Colab FAQ</a></li>
+        <li><span class="source-tag">官方</span><a href="https://docs.aws.amazon.com/sagemaker/latest/dg/studio-lab-overview.html">AWS Studio Lab Overview</a></li>
+        <li><span class="source-tag">GitHub</span><a href="https://github.com/SYSTRAN/faster-whisper">SYSTRAN/faster-whisper</a></li>
+        <li><span class="source-tag">GitHub</span><a href="https://github.com/openai/whisper">openai/whisper</a></li>
+        <li><span class="source-tag">GitHub</span><a href="https://github.com/m-bain/whisperX">m-bain/whisperX</a></li>
+        <li><span class="source-tag">GitHub</span><a href="https://github.com/reic/colab_python">reic/colab_python（被调研 notebook）</a></li>
+        <li><span class="source-tag">GitHub</span><a href="https://github.com/Akshay090/colab-cli">Akshay090/colab-cli（不推荐，已停更）</a></li>
+        <li><span class="source-tag">GitHub</span><a href="https://github.com/googleworkspace/cli">googleworkspace/cli（Drive 操作用）</a></li>
+        <li><span class="source-tag">Blog</span><a href="https://medium.com/data-science/heres-how-i-made-a-cli-tool-to-work-with-google-colab-notebooks-7678a88ca662">Medium: CLI tool for Google Colab</a></li>
+        <li><span class="source-tag">Blog</span><a href="https://jasonkayzk.github.io/2025/07/24/%E4%B8%80%E4%BA%9B%E5%85%8D%E8%B4%B9%E7%9A%84GPU%E8%B5%84%E6%BA%90/">一些免费的GPU资源 · JasonKay</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 文件输出 -->
+  <section>
+    <h2>本次生成的文件</h2>
+    <div class="card-grid">
+      <div class="card highlight" style="padding:16px 18px;">
+        <h3>📓 audio_transcription_faster_whisper.ipynb</h3>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px;">可直接上传 Colab 或 Studio Lab 运行的 notebook，含 GPU 检测、Drive 挂载、批量转录、SRT 输出、WhisperX 扩展注释。</div>
+      </div>
+      <div class="card highlight" style="padding:16px 18px;">
+        <h3>🐍 transcribe.py</h3>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px;">本地命令行脚本，自动检测 GPU/CPU 并选择 compute_type，支持 argparse 参数，输出 .txt + .srt，Colab / Studio Lab / 本地三环境通用。</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // 为代码块添加复制按钮
+  document.querySelectorAll('.code-wrap').forEach(wrap => {
+    const btn = document.createElement('button');
+    btn.textContent = '复制';
+    btn.style.cssText = 'position:absolute;top:8px;right:10px;background:rgba(108,140,255,.2);color:#6c8cff;border:1px solid rgba(108,140,255,.3);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:sans-serif;';
+    btn.onclick = () => {
+      const text = wrap.querySelector('pre').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = '已复制 ✓';
+        setTimeout(() => btn.textContent = '复制', 1500);
+      });
+    };
+    wrap.style.position = 'relative';
+    wrap.appendChild(btn);
+  });
+</script>
+</body>
+</html>
