@@ -1,27 +1,19 @@
-{
+import json
+
+# 为咨询场景定制的 notebook，包含降噪选项
+nb = {
  "nbformat": 4,
  "nbformat_minor": 5,
  "metadata": {
   "accelerator": "GPU",
-  "colab": {
-   "gpuType": "T4",
-   "provenance": []
-  },
-  "kernelspec": {
-   "display_name": "Python 3",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "name": "python",
-   "version": "3.10.0"
-  }
+  "colab": {"gpuType": "T4", "provenance": []},
+  "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
+  "language_info": {"name": "python", "version": "3.10.0"}
  },
  "cells": [
+  # ── Title ─────────────────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "title-cell",
-   "metadata": {},
+   "cell_type": "markdown", "id": "title-cell", "metadata": {},
    "source": [
     "# Audio to Text - faster-whisper + Free GPU (咨询场景优化版)\n",
     "\n",
@@ -45,10 +37,9 @@
     "---\n"
    ]
   },
+  # ── Step 0 ────────────────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "step0",
-   "metadata": {},
+   "cell_type": "markdown", "id": "step0", "metadata": {},
    "source": [
     "## Step 0 - Check GPU\n",
     "\n",
@@ -57,11 +48,7 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "check-gpu",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "check-gpu", "metadata": {}, "outputs": [],
    "source": [
     "import subprocess\n",
     "r = subprocess.run(['nvidia-smi', '--query-gpu=name,memory.total,memory.free', '--format=csv,noheader'], capture_output=True, text=True)\n",
@@ -71,20 +58,13 @@
     "    print('No GPU detected. Please switch runtime to GPU and re-run.')\n"
    ]
   },
+  # ── Step 1 ────────────────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "step1",
-   "metadata": {},
-   "source": [
-    "## Step 1 - Install\n"
-   ]
+   "cell_type": "markdown", "id": "step1", "metadata": {},
+   "source": ["## Step 1 - Install\n"]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "install",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "install", "metadata": {}, "outputs": [],
    "source": [
     "# faster-whisper does NOT require system ffmpeg\n",
     "# Uncomment next line if your audio is .m4a / .aac\n",
@@ -92,10 +72,9 @@
     "!pip install -q faster-whisper\n"
    ]
   },
+  # ── Step 2 ────────────────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "step2",
-   "metadata": {},
+   "cell_type": "markdown", "id": "step2", "metadata": {},
    "source": [
     "## Step 2 - Mount Google Drive\n",
     "\n",
@@ -103,11 +82,7 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "mount-drive",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "mount-drive", "metadata": {}, "outputs": [],
    "source": [
     "from google.colab import drive\n",
     "drive.mount('/content/drive')\n",
@@ -119,10 +94,9 @@
     "    print(' ', f)\n"
    ]
   },
+  # ── Step 3: 配置（咨询场景专用）───────────────────────
   {
-   "cell_type": "markdown",
-   "id": "step3",
-   "metadata": {},
+   "cell_type": "markdown", "id": "step3", "metadata": {},
    "source": [
     "## Step 3 - Config (咨询场景优化)\n",
     "\n",
@@ -137,11 +111,7 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "config",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "config", "metadata": {}, "outputs": [],
    "source": [
     "# ====== 咨询场景配置 ======\n",
     "# 请确保此音频文件已在 Google Drive 根目录\n",
@@ -164,10 +134,9 @@
     "print(f'音频文件: {AUDIO_FILE} ({size_mb:.1f} MB)')\n"
    ]
   },
+  # ── Step 3.5: 降噪预处理（可选）─────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "step3.5",
-   "metadata": {},
+   "cell_type": "markdown", "id": "step3.5", "metadata": {},
    "source": [
     "## Step 3.5 — 降噪预处理（可选）\n",
     "\n",
@@ -180,11 +149,7 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "denoise",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "denoise", "metadata": {}, "outputs": [],
    "source": [
     "# =========== 降噪配置 ===========\n",
     "ENABLE_DENOISE = True  # True=启用降噪，False=跳过\n",
@@ -225,20 +190,13 @@
     "    print(\"⏭️  降噪步骤已跳过，使用原始音频。\")\n"
    ]
   },
+  # ── Step 4 ────────────────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "step4",
-   "metadata": {},
-   "source": [
-    "## Step 4 - Load Model and Transcribe\n"
-   ]
+   "cell_type": "markdown", "id": "step4", "metadata": {},
+   "source": ["## Step 4 - Load Model and Transcribe\n"]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "transcribe",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "transcribe", "metadata": {}, "outputs": [],
    "source": [
     "import time\n",
     "from faster_whisper import WhisperModel, BatchedInferencePipeline\n",
@@ -266,20 +224,13 @@
     "print(f'Duration: {info.duration:.1f}s  realtime: {info.duration/elapsed:.1f}x')\n"
    ]
   },
+  # ── Step 5 ────────────────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "step5",
-   "metadata": {},
-   "source": [
-    "## Step 5 - Save Output\n"
-   ]
+   "cell_type": "markdown", "id": "step5", "metadata": {},
+   "source": ["## Step 5 - Save Output\n"]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "save",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "save", "metadata": {}, "outputs": [],
    "source": [
     "# Plain text\n",
     "with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:\n",
@@ -303,10 +254,9 @@
     "    print(f'[{seg.start:.1f}s->{seg.end:.1f}s] {seg.text.strip()}')\n"
    ]
   },
+  # ── Step 6: WhisperX 说话人分离（必选，咨询优化）─────────
   {
-   "cell_type": "markdown",
-   "id": "step6-whisperx-md",
-   "metadata": {},
+   "cell_type": "markdown", "id": "step6-whisperx-md", "metadata": {},
    "source": [
     "## Step 6 — WhisperX 说话人分离（必选）\n",
     "\n",
@@ -321,11 +271,7 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "whisperx-diarize",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "whisperx-diarize", "metadata": {}, "outputs": [],
    "source": [
     "# =========== WhisperX 说话人分离配置 ===========\n",
     "HF_TOKEN     = \"\"   # 在这里填入你的 HuggingFace Access Token\n",
@@ -428,10 +374,9 @@
     "    print(f\"[{spk}] [{seg['start']:.1f}s->{seg['end']:.1f}s] {seg['text'].strip()}\")\n"
    ]
   },
+  # ── Step 7: AI 优化处理（必选，咨询场景专用）─────────────
   {
-   "cell_type": "markdown",
-   "id": "step7-ai-md",
-   "metadata": {},
+   "cell_type": "markdown", "id": "step7-ai-md", "metadata": {},
    "source": [
     "## Step 7 — AI 优化处理（必选）咨询场景强化版\n",
     "\n",
@@ -447,11 +392,7 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "ai-optimize",
-   "metadata": {},
-   "outputs": [],
+   "cell_type": "code", "execution_count": None, "id": "ai-optimize", "metadata": {}, "outputs": [],
    "source": [
     "# =========== AI 优化配置（咨询场景） ===========\n",
     "AI_MODEL   = \"deepseek-chat\"  # \"gpt-4o-mini\" / \"deepseek-chat\"\n",
@@ -563,10 +504,9 @@
     "    print(\"⚠️  AI 优化失败，请检查 API Key 或网络。\")\n"
    ]
   },
+  # ── Studio Lab 备注 ───────────────────────────────
   {
-   "cell_type": "markdown",
-   "id": "studio-lab",
-   "metadata": {},
+   "cell_type": "markdown", "id": "studio-lab", "metadata": {},
    "source": [
     "---\n",
     "## Note: Switch to AWS Studio Lab\n",
@@ -582,3 +522,13 @@
   }
  ]
 }
+
+out = '/Users/thursday/WorkBuddy/20260331142519/audio_transcription_faster_whisper.ipynb'
+with open(out, 'w', encoding='utf-8') as f:
+    json.dump(nb, f, ensure_ascii=False, indent=1)
+
+# validate
+with open(out, encoding='utf-8') as f:
+    json.load(f)
+print('JSON valid ✅')
+print('咨询场景优化版 notebook 生成完成！')
